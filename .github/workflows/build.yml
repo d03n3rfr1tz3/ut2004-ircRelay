@@ -1,0 +1,47 @@
+name: Compile Mutator
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron:  '0 0 1 * *'
+
+jobs:
+  compile-mutator:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - game: UT99
+          patch: OldUnreal/UnrealTournamentPatches
+          pattern: 'OldUnreal-UTPatch*-Windows-amd64.zip'
+        - game: UT2004
+          patch: OldUnreal/UT2004Patches
+          pattern: 'OldUnreal-UT2004Patch*-Windows-*.zip'
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        path: ./repo
+    - name: Download Patch
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release download --repo ${{ matrix.patch }} --pattern '${{ matrix.pattern }}' --output patch.zip; 7z x patch.zip -ogame -y > /dev/null
+    - name: Build Mutator
+      run: |
+        cp -r repo/${{ matrix.game }} game/ircRelay
+        cd game/System
+        awk '/^EditPackages=/ { if (!done) { print "EditPackages=Core"; print "EditPackages=Engine"; print "EditPackages=IpDrv"; print "EditPackages=ircRelay"; done = 1 } next } { print }' Default.ini > Make.ini
+        ./UCC.exe make ini=Make.ini -silent
+        test -f ircRelay.u
+    - name: Archive Mutator
+      uses: actions/upload-artifact@v4
+      with:
+        name: ircRelay-${{ matrix.game }}
+        path: game/System/ircRelay.u*

@@ -1,5 +1,6 @@
 # IRC Relay
 
+[![Compile Mutator](https://github.com/d03n3rfr1tz3/unreal-ircRelay/actions/workflows/build.yml/badge.svg)](https://github.com/d03n3rfr1tz3/unreal-ircRelay/actions/workflows/build.yml)
 ![Minimum UT99 Version](https://img.shields.io/badge/UT99-v469+-blue.svg)
 ![Minimum UT2004 Version](https://img.shields.io/badge/UT2004-v3369+-blue.svg)
 [![License](https://img.shields.io/github/license/d03n3rfr1tz3/unreal-ircRelay.svg)](LICENSE)
@@ -30,6 +31,9 @@ There is one version for each game, both build the package `ircRelay`:
 Copy the folder of your game into your game folder and name it `ircRelay`, so the classes end up in `ircRelay/Classes`.
 Add `EditPackages=ircRelay` after the other `EditPackages` lines in the `[Editor.EditorEngine]` section of your server ini
 and run `ucc make` in the `System` folder. This creates the `System/ircRelay.u` package.
+
+The GitHub Action compiles both versions with the latest OldUnreal patch and keeps them as artifacts `ircRelay-UT99`
+and `ircRelay-UT2004`. They are compiled against patch 469 (UT99) and 3374 (UT2004).
 
 ### Loading the mutator
 
