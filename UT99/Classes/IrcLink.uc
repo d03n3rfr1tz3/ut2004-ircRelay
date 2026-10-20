@@ -22,7 +22,7 @@ const MaxLineBytes = 510;
 function Connect()
 {
 	LinkMode = MODE_Binary;
-	ReceiveMode = RMODE_Event;
+	ReceiveMode = RMODE_Manual;
 	StartTime = Level.TimeSeconds;
 	CurrentNick = Relay.ircNick;
 
@@ -115,12 +115,27 @@ function Authenticate()
 // Receiving
 //=============================================================================
 
-event ReceivedBinary(int Count, byte B[255])
+// the data of the ReceivedBinary event arrives broken in 469, so it is read manually
+event Tick(float DeltaTime)
+{
+	local byte B[255];
+	local int Count, Reads;
+
+	if (Relay == None || !bOpened)
+		return;
+
+	for (Reads = 0; Reads < 16; Reads++)
+	{
+		Count = ReadBinary(255, B);
+		if (Count <= 0)
+			break;
+		ReceiveBytes(Count, B);
+	}
+}
+
+function ReceiveBytes(int Count, byte B[255])
 {
 	local int i;
-
-	if (Relay == None)
-		return;
 
 	LastReceive = Level.TimeSeconds;
 	for (i = 0; i < Count; i++)
